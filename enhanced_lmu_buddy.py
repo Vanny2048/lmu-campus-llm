@@ -17,6 +17,15 @@ class EnhancedLMUBuddy:
         self.embeddings = self.load_or_compute_embeddings()
         self.conversation_history = []
         self.user_preferences = {}
+        self.user_context = {
+            'name': None,
+            'clubs': [],
+            'major': None,
+            'year': None,
+            'favorite_topics': [],
+            'recent_queries': []
+        }
+        self.query_frequency = {}  # Track how often specific queries are asked
         self.lmu_personality = {
             'casual': {
                 'greetings': ['Yo!', 'Hey there!', 'What\'s good?', 'Sup!'],
@@ -73,6 +82,97 @@ class EnhancedLMUBuddy:
             ]
         }
         
+        # Event emoji mapping for better visual formatting
+        self.event_emojis = {
+            'arts': '🎭',
+            'music': '🎵',
+            'sports': '🏀',
+            'academic': '📚',
+            'social': '🎉',
+            'cultural': '🌍',
+            'professional': '💼',
+            'spiritual': '🙏',
+            'food': '🍕',
+            'movie': '🎬',
+            'workshop': '🔧',
+            'lecture': '🎤',
+            'party': '🎊',
+            'meeting': '🤝',
+            'volunteer': '❤️',
+            'fitness': '💪',
+            'gaming': '🎮',
+            'dance': '💃',
+            'theater': '🎭',
+            'comedy': '😂'
+        }
+        
+        # Fun LMU trivia for sprinkling into responses
+        self.lmu_trivia = [
+            "Did you know LMU's campus has been used in over 30 major Hollywood films? Perfect backdrop for your day!",
+            "The bluff location gives us the best sunset views in LA - no wonder we're called 'the bluff'!",
+            "LMU's film school alumni have won Oscars and worked on blockbuster movies!",
+            "Our campus is so beautiful that it's been featured in countless TV shows and commercials!",
+            "The bluff trail behind campus is a hidden gem that most students don't discover until senior year!",
+            "LMU's library has ocean views from almost every study spot - talk about motivation!",
+            "The meditation garden behind Sacred Heart Chapel is where many students find their zen!",
+            "Our campus is so close to the ocean that you can sometimes smell the sea breeze!",
+            "LMU's location on the bluff means we get the best weather in LA - no smog up here!",
+            "The rooftop of Burns Fine Arts has the most Instagram-worthy sunset views on campus!"
+        ]
+        
+        # Multiple dining options for variety
+        self.dining_variations = {
+            'quick_bite': [
+                "🌮 The Hungry Lion for amazing tacos",
+                "🥪 Subway for quick sandwiches",
+                "🍕 Pizza Hut Express for grab-and-go slices",
+                "🥗 Fresh & Co for healthy salads"
+            ],
+            'sit_down': [
+                "🍕 The Lair for the full dining experience",
+                "☕ Starbucks for coffee and pastries",
+                "🍜 Panda Express for Asian cuisine",
+                "🍔 Burger Studio for classic American food"
+            ],
+            'healthy': [
+                "🥗 The Blend Bar for smoothie bowls",
+                "🥪 Fresh & Co for organic options",
+                "🍎 The Market for fresh fruits and snacks",
+                "🥤 Juice It Up for fresh juices"
+            ],
+            'late_night': [
+                "🌙 Late Night Café for midnight cravings",
+                "🍕 The Lair (late hours) for pizza",
+                "☕ Starbucks for late-night caffeine",
+                "🍦 The Den for ice cream and snacks"
+            ]
+        }
+        
+        # Engaging closing prompts
+        self.closing_prompts = {
+            'casual': [
+                "What LMU magic can I help you with next? 🔥",
+                "Need campus hacks or secret spots? Just ask! 🦁",
+                "Want the tea on something else? I'm here for it! ✨",
+                "What's on your mind about LMU? Let's chat! 💯",
+                "Need more bluff wisdom? Hit me up! 🎉"
+            ],
+            'formal': [
+                "How else may I assist you with your LMU experience?",
+                "Is there anything else you'd like to know about our campus?",
+                "What other aspects of university life would you like to explore?",
+                "How may I continue to be of service to you?",
+                "What additional information would be helpful to you?"
+            ],
+            'neutral': [
+                "What else would you like to know about LMU? 🦁",
+                "Need help with anything else campus-related? ✨",
+                "What's next on your LMU exploration list? 🔥",
+                "Want to discover more about campus life? 💫",
+                "What other LMU topics interest you? 🎯"
+            ]
+        }
+    
     def load_lmu_data(self):
         """Load LMU data from JSON file"""
         try:
@@ -286,22 +386,234 @@ class EnhancedLMUBuddy:
             personality = self.lmu_personality.get(tone, self.lmu_personality['neutral'])
             
             if tone == 'casual':
-                return f"💡 {insight} {random.choice(personality['excitement'])}"
+                return f"💡 **Bluff Wisdom**: {insight} {random.choice(personality['excitement'])}"
             elif tone == 'formal':
-                return f"💡 {insight} {random.choice(personality['excitement'])}"
+                return f"💡 **Campus Insight**: {insight}"
             else:
-                return f"💡 {insight} {random.choice(personality['excitement'])}"
+                return f"💡 **Campus Insight**: {insight} 🦁"
         return ""
+    
+    def track_query_frequency(self, query):
+        """Track how often specific queries are asked to avoid repetition"""
+        query_lower = query.lower().strip()
+        self.query_frequency[query_lower] = self.query_frequency.get(query_lower, 0) + 1
+        return self.query_frequency[query_lower]
+    
+    def is_repeated_query(self, query):
+        """Check if this is a repeated query that needs diversification"""
+        query_lower = query.lower().strip()
+        return self.query_frequency.get(query_lower, 0) > 1
+    
+    def get_personalized_greeting(self, tone='neutral'):
+        """Get personalized greeting based on user context"""
+        personality = self.lmu_personality.get(tone, self.lmu_personality['neutral'])
+        
+        if self.user_context['name']:
+            if tone == 'casual':
+                return f"Yo {self.user_context['name']}! "
+            elif tone == 'formal':
+                return f"Greetings {self.user_context['name']}! "
+            else:
+                return f"Hey {self.user_context['name']}! "
+        
+        return random.choice(personality['greetings']) + " "
+    
+    def add_contextual_recommendation(self, query, tone='neutral'):
+        """Add personalized recommendations based on user context"""
+        query_lower = query.lower()
+        
+        # Check if user is in specific clubs/organizations
+        if self.user_context['clubs']:
+            club = self.user_context['clubs'][0]  # Use first club for now
+            if 'film' in club.lower() and any(word in query_lower for word in ['event', 'activity', 'fun']):
+                return f"Since you're in the {club}, check out the upcoming film screenings at the Burns Fine Arts Center! 🎬"
+            elif 'business' in club.lower() and any(word in query_lower for word in ['career', 'professional', 'networking']):
+                return f"As a {club} member, you might be interested in the upcoming networking events! 💼"
+        
+        # Check if user has a specific major
+        if self.user_context['major']:
+            if 'science' in self.user_context['major'].lower() and any(word in query_lower for word in ['food', 'eat', 'dining']):
+                return f"Hey, if you're heading to science classes, grab food at the Lion's Den - it's right near the science building! 🧪"
+            elif 'arts' in self.user_context['major'].lower() and any(word in query_lower for word in ['study', 'quiet', 'library']):
+                return f"Since you're in the arts, the Burns Fine Arts library is perfect for your creative projects! 🎨"
+        
+        return ""
+    
+    def sprinkle_lmu_trivia(self, tone='neutral'):
+        """Randomly add fun LMU trivia to responses"""
+        if random.random() < 0.3:  # 30% chance to add trivia
+            trivia = random.choice(self.lmu_trivia)
+            personality = self.lmu_personality.get(tone, self.lmu_personality['neutral'])
+            
+            if tone == 'casual':
+                return f"\n\n💭 **Fun Fact**: {trivia} {random.choice(personality['excitement'])}"
+            elif tone == 'formal':
+                return f"\n\n💡 **Interesting Note**: {trivia}"
+            else:
+                return f"\n\n💭 **Fun Fact**: {trivia} 🦁"
+        
+        return ""
+    
+    def get_engaging_closing_prompt(self, tone='neutral'):
+        """Get an engaging closing prompt based on tone"""
+        prompts = self.closing_prompts.get(tone, self.closing_prompts['neutral'])
+        return random.choice(prompts)
+    
+    def extract_user_context(self, user_input):
+        """Extract user context from conversation to enable personalized recommendations"""
+        user_input_lower = user_input.lower()
+        
+        # Extract name if mentioned
+        if "my name is" in user_input_lower or "i'm" in user_input_lower or "i am" in user_input_lower:
+            # Simple name extraction - could be enhanced with NLP
+            words = user_input.split()
+            for i, word in enumerate(words):
+                if word.lower() in ['name', 'is', 'am', 'i\'m'] and i + 1 < len(words):
+                    potential_name = words[i + 1].strip('.,!?')
+                    if len(potential_name) > 1 and potential_name.isalpha():
+                        self.user_context['name'] = potential_name
+                        break
+        
+        # Extract major if mentioned
+        major_keywords = ['major', 'studying', 'study', 'degree', 'field']
+        for keyword in major_keywords:
+            if keyword in user_input_lower:
+                # Extract major from context
+                words = user_input.split()
+                for i, word in enumerate(words):
+                    if word.lower() == keyword and i + 1 < len(words):
+                        potential_major = words[i + 1].strip('.,!?')
+                        if len(potential_major) > 2:
+                            self.user_context['major'] = potential_major
+                            break
+        
+        # Extract clubs/organizations if mentioned
+        club_keywords = ['club', 'organization', 'member', 'join', 'part of']
+        for keyword in club_keywords:
+            if keyword in user_input_lower:
+                # Extract club name from context
+                words = user_input.split()
+                for i, word in enumerate(words):
+                    if word.lower() in club_keywords and i + 1 < len(words):
+                        potential_club = words[i + 1].strip('.,!?')
+                        if len(potential_club) > 2 and potential_club not in self.user_context['clubs']:
+                            self.user_context['clubs'].append(potential_club)
+                            break
+        
+        # Extract year if mentioned
+        year_keywords = ['freshman', 'sophomore', 'junior', 'senior', 'first year', 'second year', 'third year', 'fourth year']
+        for keyword in year_keywords:
+            if keyword in user_input_lower:
+                self.user_context['year'] = keyword
+                break
+        
+        # Track favorite topics based on query frequency
+        topic_keywords = {
+            'academic': ['professor', 'course', 'study', 'class', 'exam'],
+            'social': ['event', 'party', 'club', 'organization', 'friend'],
+            'dining': ['food', 'eat', 'dining', 'restaurant', 'cafe'],
+            'facilities': ['library', 'gym', 'study', 'building', 'facility']
+        }
+        
+        for topic, keywords in topic_keywords.items():
+            if any(keyword in user_input_lower for keyword in keywords):
+                if topic not in self.user_context['favorite_topics']:
+                    self.user_context['favorite_topics'].append(topic)
+                break
+    
+    def format_event_with_emoji(self, event, tone='neutral'):
+        """Format event with appropriate emoji and engaging details"""
+        event_type = event.get('type', '').lower()
+        emoji = self.event_emojis.get(event_type, '📅')
+        
+        # Find the best matching emoji
+        for key, value in self.event_emojis.items():
+            if key in event_type:
+                emoji = value
+                break
+        
+        # Add engaging details based on event type
+        engaging_details = ""
+        if 'free' in event.get('description', '').lower():
+            engaging_details = " (FREE!)"
+        elif 'pizza' in event.get('description', '').lower():
+            engaging_details = " (FREE pizza!)"
+        elif 'concert' in event_type or 'music' in event_type:
+            engaging_details = " (Live music!)"
+        elif 'sports' in event_type:
+            engaging_details = " (Go Lions!)"
+        
+        return f"{emoji} **{event['name']}**{engaging_details} ({event['date']})\n📍 {event['location']}\n📝 {event['description'][:100]}...\n"
+    
+    def get_diverse_dining_response(self, query, tone='neutral'):
+        """Get diverse dining recommendations to avoid repetition"""
+        query_lower = query.lower()
+        personality = self.lmu_personality.get(tone, self.lmu_personality['neutral'])
+        
+        # Check if this is a repeated dining query and add playful response
+        if self.is_repeated_query(query):
+            if tone == 'casual':
+                response = f"You asked twice! Hungry much? 😂 Here are some fresh spots:\n\n"
+            elif tone == 'formal':
+                response = "I notice you've asked about dining options before. Here are some additional recommendations:\n\n"
+            else:
+                response = "You asked twice! Hungry much? 😂 Here are some fresh spots:\n\n"
+        else:
+            if tone == 'casual':
+                response = "LMU's got you covered food-wise! 🌮\n\n"
+            elif tone == 'formal':
+                response = "LMU offers several excellent dining options:\n\n"
+            else:
+                response = "LMU's got you covered food-wise! 🌮\n\n"
+        
+        # Determine dining preference from query
+        if any(word in query_lower for word in ['quick', 'fast', 'grab']):
+            options = self.dining_variations['quick_bite']
+        elif any(word in query_lower for word in ['sit', 'relax', 'chill']):
+            options = self.dining_variations['sit_down']
+        elif any(word in query_lower for word in ['healthy', 'fresh', 'organic']):
+            options = self.dining_variations['healthy']
+        elif any(word in query_lower for word in ['late', 'night', 'midnight']):
+            options = self.dining_variations['late_night']
+        else:
+            # Mix different types for variety
+            all_options = []
+            for category in self.dining_variations.values():
+                all_options.extend(category)
+            options = random.sample(all_options, min(4, len(all_options)))
+        
+        for option in options[:3]:
+            response += f"• {option}\n"
+        
+        if tone == 'casual':
+            response += f"\nWhat vibe you looking for—quick bite or chill hangout? {random.choice(personality['excitement'])}"
+        elif tone == 'formal':
+            response += "\nWhich type of dining experience interests you most?"
+        else:
+            response += "\nWhat vibe you looking for—quick bite or chill hangout? 🦁"
+        
+        return response
     
     def generate_response(self, user_input):
         """Enhanced response generation with better context awareness and LMU-specific knowledge"""
         user_input_lower = user_input.lower()
+        
+        # Track query frequency for diversification
+        self.track_query_frequency(user_input)
         
         # Analyze user tone
         user_tone = self.analyze_user_tone(user_input)
         
         # Add to conversation history
         self.conversation_history.append({"role": "user", "content": user_input})
+        
+        # Update user context with recent queries
+        self.user_context['recent_queries'].append(user_input_lower)
+        if len(self.user_context['recent_queries']) > 10:
+            self.user_context['recent_queries'].pop(0)
+        
+        # Extract user context from conversation
+        self.extract_user_context(user_input_lower)
         
         # Check for specific query types with enhanced detection
         if any(word in user_input_lower for word in ['professor', 'teacher', 'instructor', 'faculty', 'dr.', 'prof.']):
@@ -325,7 +637,11 @@ class EnhancedLMUBuddy:
         elif any(word in user_input_lower for word in ['weather', 'sunset', 'view', 'bluff', 'campus']):
             return self.handle_campus_life_query(user_input, user_tone)
         else:
-            return self.handle_general_query(user_input, user_tone)
+            # Check if this is an unknown or too broad query
+            if len(user_input.split()) < 3 or any(word in user_input_lower for word in ['what', 'how', 'why', 'when', 'where']):
+                return self.handle_unknown_query(user_input, user_tone)
+            else:
+                return self.handle_general_query(user_input, user_tone)
     
     def handle_professor_query(self, query, tone='neutral'):
         """Enhanced professor query handler with better LMU-specific insights"""
@@ -366,15 +682,18 @@ class EnhancedLMUBuddy:
             if tone == 'casual':
                 response += f"💡 {tip_start}: {prof_info['name']} is known for being super chill in office hours. Students say they're really approachable and actually care about your success. Plus, they usually curve generously! {random.choice(personality['excitement'])}\n\n"
                 response += "🎯 **Student Gossip**: Rumor has it they're working on some groundbreaking research in their field. Might be worth asking about in class!"
-                response += f"\n\n{self.get_lmu_insight('academic_tips', tone)}"
             elif tone == 'formal':
                 response += f"💡 {tip_start}: Professor {prof_info['name']} maintains excellent office hours and is known for their dedication to student success. Many students report significant academic growth in their courses.\n\n"
                 response += "📚 **Academic Note**: They are actively engaged in research and often welcome undergraduate participation in their projects."
-                response += f"\n\n{self.get_lmu_insight('academic_tips', tone)}"
             else:
                 response += f"💡 {tip_start}: Check Rate My Professor for detailed reviews and student experiences! 🦁\n\n"
                 response += "🎓 **Campus Insight**: This professor is well-respected in their department and often mentors students beyond the classroom."
-                response += f"\n\n{self.get_lmu_insight('academic_tips', tone)}"
+            
+            # Add contextual recommendations and trivia
+            response += self.add_contextual_recommendation(query, tone)
+            response += self.sprinkle_lmu_trivia(tone)
+            response += f"\n\n{self.get_lmu_insight('academic_tips', tone)}"
+            response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
             
             return response
         
@@ -439,7 +758,11 @@ class EnhancedLMUBuddy:
                 response += f"💡 {tip_start}: Students generally find this course engaging and well-structured. Office hours are highly recommended! 🦁\n\n"
                 response += "🎓 **Campus Insight**: This course is popular among students and often fills up quickly during registration."
             
+            # Add contextual recommendations and trivia
+            response += self.add_contextual_recommendation(query, tone)
+            response += self.sprinkle_lmu_trivia(tone)
             response += f"\n\n{self.get_lmu_insight('academic_tips', tone)}"
+            response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
             return response
         
         # Search for courses by department or other criteria
@@ -463,6 +786,14 @@ class EnhancedLMUBuddy:
         """Enhanced dining query handler with LMU-specific food knowledge"""
         search_results = self.semantic_search(query, top_k=3)
         personality = self.lmu_personality.get(tone, self.lmu_personality['neutral'])
+        
+        # Check if this is a repeated query and use diverse response
+        if self.is_repeated_query(query):
+            response = self.get_diverse_dining_response(query, tone)
+            response += self.add_contextual_recommendation(query, tone)
+            response += self.sprinkle_lmu_trivia(tone)
+            response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
+            return response
         
         if search_results:
             best_result = search_results[0]
@@ -503,44 +834,10 @@ class EnhancedLMUBuddy:
                 response += f"\n\n{self.get_lmu_insight('student_life', tone)}"
                 return response
         
-        # General dining recommendations
-        if tone == 'casual':
-            response = "🍕 **LMU Food Scene - The Real Tea** 🍕\n\n"
-            response += "**The Lair (Main Dining):**\n"
-            response += "• Literally the heart of campus social life\n"
-            response += "• Pizza is legendary (no cap)\n"
-            response += "• Smoothie bowls at the Lion's Den are everything\n"
-            response += "• Pro tip: avoid the rush by going 15 minutes before lunch crowd\n\n"
-            response += "**Hidden Gems:**\n"
-            response += "• The meditation garden cafe has the best coffee\n"
-            response += "• Food trucks sometimes park near the library\n"
-            response += "• The bluff trail has picnic spots with amazing views\n\n"
-            response += f"💡 **Pro Tip**: Download the LMU dining app for real-time menus! {random.choice(personality['excitement'])}"
-        elif tone == 'formal':
-            response = "🍕 **LMU Dining Facilities Overview** 🍕\n\n"
-            response += "**Main Dining Hall (The Lair):**\n"
-            response += "• Central dining facility serving diverse meal options\n"
-            response += "• Features multiple food stations and seating areas\n"
-            response += "• Popular gathering spot for students and faculty\n"
-            response += "• Recommended to visit during off-peak hours for optimal experience\n\n"
-            response += "**Additional Options:**\n"
-            response += "• Various cafes and snack locations throughout campus\n"
-            response += "• Outdoor dining areas with scenic views\n"
-            response += "• Catering services available for special events\n\n"
-            response += "💡 **Recommendation**: Utilize the LMU dining application for current menu information."
-        else:
-            response = "🍕 **LMU Dining Guide** 🍕\n\n"
-            response += "**The Lair (Main Dining):**\n"
-            response += "• The main dining spot and social hub of campus\n"
-            response += "• Famous for their pizza and variety of options\n"
-            response += "• Lion's Den has great smoothie bowls and healthy options\n"
-            response += "• Best to avoid peak lunch hours (12-1 PM)\n\n"
-            response += "**Other Options:**\n"
-            response += "• Various cafes around campus for coffee and snacks\n"
-            response += "• Outdoor dining areas with beautiful views\n"
-            response += "• Food trucks occasionally visit campus\n\n"
-            response += "💡 **Pro Tip**: Check the LMU dining app for daily menus! 🦁"
-        
+        # General dining recommendations with diverse options
+        response = self.get_diverse_dining_response(query, tone)
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
         response += f"\n\n{self.get_lmu_insight('student_life', tone)}"
         return response
     
@@ -585,7 +882,10 @@ class EnhancedLMUBuddy:
                     response += f"\n💡 **Pro Tip**: {housing_info['name']} is known for being {random.choice(['very social', 'quiet and studious', 'convenient to classes', 'great community'])}! 🦁\n\n"
                     response += "🎯 **Campus Insight**: Students here really love the community!"
                 
+                response += self.add_contextual_recommendation(query, tone)
+                response += self.sprinkle_lmu_trivia(tone)
                 response += f"\n\n{self.get_lmu_insight('student_life', tone)}"
+                response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
                 return response
         
         # General housing recommendations
@@ -623,7 +923,10 @@ class EnhancedLMUBuddy:
             response += "• Off-campus options in Playa Vista area\n\n"
             response += "💡 **Pro Tip**: Apply early for the best housing options! 🦁"
         
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
         response += f"\n\n{self.get_lmu_insight('student_life', tone)}"
+        response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
         return response
     
     def handle_event_query(self, query, tone='neutral'):
@@ -635,56 +938,55 @@ class EnhancedLMUBuddy:
             if tone == 'casual':
                 response = "🎉 **What's Popping at LMU - Next 2 Weeks** 🎉\n\n"
                 for event in upcoming_events[:5]:
-                    response += f"📅 **{event['name']}** ({event['date']})\n"
-                    response += f"📍 {event['location']}\n"
-                    response += f"🎯 {event['type']}\n"
-                    response += f"📝 {event['description'][:100]}...\n\n"
-                response += f"💡 **Pro Tip**: Follow @lmu_events on Instagram for the latest updates! {random.choice(personality['excitement'])}"
+                    response += self.format_event_with_emoji(event, tone)
+                    response += "\n"
+                response += f"💡 **Pro Tip**: Follow @lmu_events on Instagram for the latest updates! {random.choice(personality['excitement'])}\n\n"
+                response += "🎯 **Want to RSVP to any? Or looking for specific club meetups?**"
             elif tone == 'formal':
                 response = "🎉 **Upcoming LMU Events - Next Two Weeks** 🎉\n\n"
                 for event in upcoming_events[:5]:
-                    response += f"📅 **{event['name']}** - {event['date']}\n"
-                    response += f"📍 Location: {event['location']}\n"
-                    response += f"🎯 Category: {event['type']}\n"
-                    response += f"📝 Description: {event['description'][:100]}...\n\n"
-                response += "💡 **Recommendation**: Monitor the official LMU events calendar for current information."
+                    response += self.format_event_with_emoji(event, tone)
+                    response += "\n"
+                response += "💡 **Recommendation**: Monitor the official LMU events calendar for current information.\n\n"
+                response += "📋 **Would you like information about RSVP procedures or specific event details?**"
             else:
                 response = "🎉 **Upcoming LMU Events** 🎉\n\n"
                 for event in upcoming_events[:5]:
-                    response += f"📅 **{event['name']}** ({event['date']})\n"
-                    response += f"📍 {event['location']}\n"
-                    response += f"🎯 {event['type']}\n"
-                    response += f"📝 {event['description'][:100]}...\n\n"
-                response += "💡 **Pro Tip**: Check the LMU events calendar regularly! 🦁"
+                    response += self.format_event_with_emoji(event, tone)
+                    response += "\n"
+                response += "💡 **Pro Tip**: Check the LMU events calendar regularly! 🦁\n\n"
+                response += "🎯 **Want to RSVP to any? Or looking for specific club meetups?**"
         else:
             if tone == 'casual':
                 response = "🎉 **LMU Events Scene** 🎉\n\n"
                 response += "**What's Always Happening:**\n"
-                response += "• Greek life mixers and formals\n"
-                response += "• Cultural events and celebrations\n"
-                response += "• Academic lectures and workshops\n"
-                response += "• Sports games and tailgates\n"
-                response += "• Movie nights and social events\n\n"
+                response += "• 🏛️ Greek life mixers and formals\n"
+                response += "• 🌍 Cultural events and celebrations\n"
+                response += "• 📚 Academic lectures and workshops\n"
+                response += "• 🏀 Sports games and tailgates\n"
+                response += "• 🎬 Movie nights and social events\n\n"
                 response += f"💡 **Pro Tip**: Join clubs and organizations to stay in the loop! {random.choice(personality['excitement'])}"
             elif tone == 'formal':
                 response = "🎉 **LMU Events and Activities** 🎉\n\n"
                 response += "**Regular Programming:**\n"
-                response += "• Greek life social events and formal functions\n"
-                response += "• Cultural celebrations and diversity programs\n"
-                response += "• Academic lectures and professional development workshops\n"
-                response += "• Athletic competitions and school spirit events\n"
-                response += "• Entertainment and social programming\n\n"
+                response += "• 🏛️ Greek life social events and formal functions\n"
+                response += "• 🌍 Cultural celebrations and diversity programs\n"
+                response += "• 📚 Academic lectures and professional development workshops\n"
+                response += "• 🏀 Athletic competitions and school spirit events\n"
+                response += "• 🎬 Entertainment and social programming\n\n"
                 response += "💡 **Recommendation**: Engage with campus organizations for comprehensive event information."
             else:
                 response = "🎉 **LMU Events & Activities** 🎉\n\n"
                 response += "**Regular Events:**\n"
-                response += "• Greek life mixers and formals\n"
-                response += "• Cultural events and celebrations\n"
-                response += "• Academic lectures and workshops\n"
-                response += "• Sports games and school spirit events\n"
-                response += "• Social events and entertainment\n\n"
+                response += "• 🏛️ Greek life mixers and formals\n"
+                response += "• 🌍 Cultural events and celebrations\n"
+                response += "• 📚 Academic lectures and workshops\n"
+                response += "• 🏀 Sports games and school spirit events\n"
+                response += "• 🎬 Social events and entertainment\n\n"
                 response += "💡 **Pro Tip**: Get involved in campus organizations! 🦁"
         
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
         response += f"\n\n{self.get_lmu_insight('student_life', tone)}"
         return response
     
@@ -723,7 +1025,10 @@ class EnhancedLMUBuddy:
                     response += f"\n💡 **Pro Tip**: {org_info['name']} is known for being {random.choice(['very active', 'great for networking', 'fun and engaging', 'impactful'])}! 🦁\n\n"
                     response += "🎯 **Campus Insight**: Students love being part of this organization!"
                 
+                response += self.add_contextual_recommendation(query, tone)
+                response += self.sprinkle_lmu_trivia(tone)
                 response += f"\n\n{self.get_lmu_insight('campus_culture', tone)}"
+                response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
                 return response
         
         # General organization recommendations
@@ -814,7 +1119,10 @@ class EnhancedLMUBuddy:
                     response += f"\n💡 **Pro Tip**: {facility_info['name']} is known for being {random.choice(['great for studying', 'perfect for socializing', 'very convenient', 'really nice'])}! 🦁\n\n"
                     response += "🎯 **Campus Insight**: Students love using this facility!"
                 
+                response += self.add_contextual_recommendation(query, tone)
+                response += self.sprinkle_lmu_trivia(tone)
                 response += f"\n\n{self.get_lmu_insight('hidden_gems', tone)}"
+                response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
                 return response
         
         # General facility recommendations
@@ -864,7 +1172,10 @@ class EnhancedLMUBuddy:
             response += "• Various lounges throughout campus\n\n"
             response += "💡 **Pro Tip**: The library's ocean view study rooms are amazing! 🦁"
         
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
         response += f"\n\n{self.get_lmu_insight('hidden_gems', tone)}"
+        response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
         return response
     
     def handle_news_query(self, query, tone='neutral'):
@@ -911,7 +1222,10 @@ class EnhancedLMUBuddy:
             response += "• Career fair dates announced\n\n"
             response += "💡 **Pro Tip**: Follow LMU social media for updates! 🦁"
         
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
         response += f"\n\n{self.get_lmu_insight('campus_culture', tone)}"
+        response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
         return response
     
     def handle_general_query(self, query, tone='neutral'):
@@ -1042,8 +1356,51 @@ class EnhancedLMUBuddy:
             random_category = random.choice(insight_categories)
             response += f"\n\n{self.get_lmu_insight(random_category, tone)}"
         
+        # Add contextual recommendations and trivia
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
+        
+        # Add engaging closing prompt
+        response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
+        
         return response
-
+    
+    def handle_unknown_query(self, query, tone='neutral'):
+        """Handle unknown or too broad queries with helpful redirection"""
+        personality = self.lmu_personality.get(tone, self.lmu_personality['neutral'])
+        
+        if tone == 'casual':
+            response = f"That's a great question! I'm still learning, but here are some things I can help you with: {random.choice(personality['excitement'])}\n\n"
+            response += "🎯 **Try asking me about:**\n"
+            response += "• 'What's popping this week?' (for events)\n"
+            response += "• 'Where should I eat on campus?' (for dining)\n"
+            response += "• 'Show me some good professors' (for academics)\n"
+            response += "• 'What clubs should I join?' (for organizations)\n"
+            response += "• 'Where can I study?' (for facilities)\n\n"
+            response += "💡 **Pro Tip**: Be specific and I'll give you the best info! For official stuff, check out the LMU website."
+        elif tone == 'formal':
+            response = "That's an excellent question! While I'm continuously expanding my knowledge base, I can provide information on the following topics:\n\n"
+            response += "📋 **Available Information:**\n"
+            response += "• Academic matters (professors, courses, study resources)\n"
+            response += "• Campus facilities and services\n"
+            response += "• Dining options and meal plans\n"
+            response += "• Student organizations and activities\n"
+            response += "• Transportation and parking information\n\n"
+            response += "💡 **Recommendation**: For official university information, please consult the LMU website or contact the appropriate department."
+        else:
+            response = "That's a great question! I'm still learning, but you might check out the official LMU website or try asking me about:\n\n"
+            response += "🎯 **Popular topics:**\n"
+            response += "• 'What's happening this week?' (for events)\n"
+            response += "• 'Where should I eat on campus?' (for dining)\n"
+            response += "• 'Show me some good professors' (for academics)\n"
+            response += "• 'What clubs should I join?' (for organizations)\n"
+            response += "• 'Where can I study?' (for facilities)\n\n"
+            response += "💡 **Pro Tip**: Be specific and I'll give you the best info! 🦁"
+        
+        response += self.sprinkle_lmu_trivia(tone)
+        response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
+        return response
+    
     def handle_transportation_query(self, query, tone='neutral'):
         """Handle transportation and parking queries with LMU-specific knowledge"""
         personality = self.lmu_personality.get(tone, self.lmu_personality['neutral'])
@@ -1094,7 +1451,10 @@ class EnhancedLMUBuddy:
             response += "• Walking distance from many nearby apartments\n\n"
             response += "💡 **Pro Tip**: Use the LMU app for real-time shuttle tracking! 🦁"
         
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
         response += f"\n\n{self.get_lmu_insight('student_life', tone)}"
+        response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
         return response
     
     def handle_campus_life_query(self, query, tone='neutral'):
@@ -1147,8 +1507,11 @@ class EnhancedLMUBuddy:
             response += "• Everyone is friendly and supportive\n\n"
             response += "💡 **Pro Tip**: The bluff trail is perfect for sunset walks! 🦁"
         
+        response += self.add_contextual_recommendation(query, tone)
+        response += self.sprinkle_lmu_trivia(tone)
         response += f"\n\n{self.get_lmu_insight('campus_culture', tone)}"
         response += f"\n\n{self.get_lmu_insight('hidden_gems', tone)}"
+        response += f"\n\n{self.get_engaging_closing_prompt(tone)}"
         return response
 
 def create_enhanced_chat_interface():
@@ -1176,7 +1539,7 @@ def create_enhanced_chat_interface():
             st.markdown(f'<div class="bot-message">{message["content"]}</div>', unsafe_allow_html=True)
     
     # Chat input
-    user_input = st.text_input("Ask Enhanced LMU Buddy anything...", key="enhanced_chat_input")
+    user_input = st.text_input("What LMU magic can I help you with? 🔥", key="enhanced_chat_input")
     
     if st.button("Send", key="enhanced_send_button") and user_input:
         # Add user message to history
