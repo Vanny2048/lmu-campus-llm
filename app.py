@@ -99,31 +99,46 @@ def save_waitlist(data):
     with open('waitlist.json', 'w') as f:
         json.dump(data, f)
 
-# LMU Buddy AI responses
+# Import enhanced LMU Buddy
+from enhanced_lmu_buddy import EnhancedLMUBuddy
+
+# Initialize Enhanced LMU Buddy
+def get_enhanced_lmu_buddy():
+    if 'enhanced_lmu_buddy' not in st.session_state:
+        with st.spinner("Loading LMU Buddy... This may take a moment on first run."):
+            st.session_state.enhanced_lmu_buddy = EnhancedLMUBuddy()
+    return st.session_state.enhanced_lmu_buddy
+
+# LMU Buddy AI responses (fallback)
 def get_lmu_buddy_response(user_input):
-    responses = {
-        "food": "🍕 The best food spots on campus? Hands down, it's the Lair! Their pizza is legendary, and the smoothie bowls at the Lion's Den are perfect for those early morning classes. Pro tip: avoid the rush by going 15 minutes before the lunch crowd hits! 🦁",
-        "study": "📚 Best study spots? The Hannon Library is clutch, especially the quiet zones on the 3rd floor. But my secret spot? The rooftop of the Burns Fine Arts Center - amazing views and usually pretty quiet! Perfect for those late-night cram sessions. ✨",
-        "weekend": "🎉 This weekend? Check out the LMU events calendar! There's always something happening - from Greek life mixers to cultural events. Plus, the farmers market on Sundays is a vibe. Don't forget to follow @lmu_events on Instagram for the latest! 🎊",
-        "greek": "🏛️ Greek Life hacks? Rush season is intense but so worth it! Go to as many events as possible, be yourself, and don't stress about the perfect outfit. The connections you make last way beyond college. Plus, the parties are epic! 🎭",
-        "parking": "🚗 Parking drama? Yeah, it's real. Get there early (like 8 AM early) or park at the Playa Vista shuttle lot. The shuttle runs every 15 minutes and it's free with your student ID. Saves you from the parking ticket stress! 🎫",
-        "default": "🤔 That's a great question! As your LMU Buddy, I'm here to help with everything campus-related. Try asking me about food spots, study locations, weekend events, Greek life, or parking tips! I'm constantly learning more about our amazing campus. 🦁✨"
-    }
-    
-    user_input_lower = user_input.lower()
-    
-    if any(word in user_input_lower for word in ['food', 'eat', 'restaurant', 'dining']):
-        return responses["food"]
-    elif any(word in user_input_lower for word in ['study', 'library', 'quiet', 'spot']):
-        return responses["study"]
-    elif any(word in user_input_lower for word in ['weekend', 'party', 'event', 'fun']):
-        return responses["weekend"]
-    elif any(word in user_input_lower for word in ['greek', 'sorority', 'fraternity', 'rush']):
-        return responses["greek"]
-    elif any(word in user_input_lower for word in ['parking', 'car', 'shuttle']):
-        return responses["parking"]
-    else:
-        return responses["default"]
+    try:
+        buddy = get_enhanced_lmu_buddy()
+        return buddy.generate_response(user_input)
+    except Exception as e:
+        # Fallback to simple responses
+        responses = {
+            "food": "🍕 The best food spots on campus? Hands down, it's the Lair! Their pizza is legendary, and the smoothie bowls at the Lion's Den are perfect for those early morning classes. Pro tip: avoid the rush by going 15 minutes before the lunch crowd hits! 🦁",
+            "study": "📚 Best study spots? The Hannon Library is clutch, especially the quiet zones on the 3rd floor. But my secret spot? The rooftop of the Burns Fine Arts Center - amazing views and usually pretty quiet! Perfect for those late-night cram sessions. ✨",
+            "weekend": "🎉 This weekend? Check out the LMU events calendar! There's always something happening - from Greek life mixers to cultural events. Plus, the farmers market on Sundays is a vibe. Don't forget to follow @lmu_events on Instagram for the latest! 🎊",
+            "greek": "🏛️ Greek Life hacks? Rush season is intense but so worth it! Go to as many events as possible, be yourself, and don't stress about the perfect outfit. The connections you make last way beyond college. Plus, the parties are epic! 🎭",
+            "parking": "🚗 Parking drama? Yeah, it's real. Get there early (like 8 AM early) or park at the Playa Vista shuttle lot. The shuttle runs every 15 minutes and it's free with your student ID. Saves you from the parking ticket stress! 🎫",
+            "default": "🤔 That's a great question! As your LMU Buddy, I'm here to help with everything campus-related. Try asking me about food spots, study locations, weekend events, Greek life, or parking tips! I'm constantly learning more about our amazing campus. 🦁✨"
+        }
+        
+        user_input_lower = user_input.lower()
+        
+        if any(word in user_input_lower for word in ['food', 'eat', 'restaurant', 'dining']):
+            return responses["food"]
+        elif any(word in user_input_lower for word in ['study', 'library', 'quiet', 'spot']):
+            return responses["study"]
+        elif any(word in user_input_lower for word in ['weekend', 'party', 'event', 'fun']):
+            return responses["weekend"]
+        elif any(word in user_input_lower for word in ['greek', 'sorority', 'fraternity', 'rush']):
+            return responses["greek"]
+        elif any(word in user_input_lower for word in ['parking', 'car', 'shuttle']):
+            return responses["parking"]
+        else:
+            return responses["default"]
 
 # Navigation
 selected = option_menu(
@@ -224,55 +239,172 @@ if selected == "🏠 Home":
 elif selected == "🤖 LMU Buddy":
     st.markdown("""
     <div class="main-header">
-        <h1>🤖 Meet LMU Buddy</h1>
-        <p>Your AI campus companion - Ask anything about LMU!</p>
+        <h1>🤖 Meet Enhanced LMU Buddy</h1>
+        <p>Your AI campus companion with comprehensive LMU knowledge!</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Chat interface
-    st.markdown("### 💬 Chat with LMU Buddy")
-    
-    # Display chat history
-    for message in st.session_state.chat_history:
-        if message["role"] == "user":
-            st.markdown(f'<div class="user-message">{message["content"]}</div>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<div class="bot-message">{message["content"]}</div>', unsafe_allow_html=True)
-    
-    # Chat input
-    user_input = st.text_input("Ask LMU Buddy anything...", key="chat_input")
-    
-    if st.button("Send", key="send_button") and user_input:
-        # Add user message to history
-        st.session_state.chat_history.append({"role": "user", "content": user_input})
+    # Initialize Enhanced LMU Buddy
+    try:
+        buddy = get_enhanced_lmu_buddy()
         
-        # Get AI response
-        ai_response = get_lmu_buddy_response(user_input)
-        st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+        # Data insights
+        st.markdown("### 📊 LMU Knowledge Base")
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Professors", len(buddy.data.get('professors', [])))
+        with col2:
+            st.metric("Courses", len(buddy.data.get('courses', [])))
+        with col3:
+            st.metric("Dining Options", len(buddy.data.get('dining', [])))
+        with col4:
+            st.metric("Organizations", len(buddy.data.get('organizations', [])))
         
-        st.rerun()
+        # Chat interface
+        st.markdown("### 💬 Chat with Enhanced LMU Buddy")
+        
+        # Display chat history
+        for message in st.session_state.chat_history:
+            if message["role"] == "user":
+                st.markdown(f'<div class="user-message">{message["content"]}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="bot-message">{message["content"]}</div>', unsafe_allow_html=True)
+        
+        # Chat input
+        user_input = st.text_input("Ask Enhanced LMU Buddy anything...", key="chat_input")
+        
+        if st.button("Send", key="send_button") and user_input:
+            # Add user message to history
+            st.session_state.chat_history.append({"role": "user", "content": user_input})
+            
+            # Get AI response
+            with st.spinner("LMU Buddy is thinking..."):
+                ai_response = buddy.generate_response(user_input)
+            st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+            
+            st.rerun()
+        
+        # Quick access buttons
+        st.markdown("### 🚀 Quick Access")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("**📚 Academic**")
+            if st.button("Find Professors", key="find_professors"):
+                st.session_state.chat_history.append({"role": "user", "content": "Show me some good professors"})
+                ai_response = buddy.generate_response("Show me some good professors")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+            
+            if st.button("Popular Courses", key="popular_courses"):
+                st.session_state.chat_history.append({"role": "user", "content": "What are some popular courses?"})
+                ai_response = buddy.generate_response("What are some popular courses?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+        
+        with col2:
+            st.markdown("**🎉 Campus Life**")
+            if st.button("Upcoming Events", key="upcoming_events"):
+                st.session_state.chat_history.append({"role": "user", "content": "What events are coming up?"})
+                ai_response = buddy.generate_response("What events are coming up?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+            
+            if st.button("Best Food Spots", key="best_food"):
+                st.session_state.chat_history.append({"role": "user", "content": "Where should I eat on campus?"})
+                ai_response = buddy.generate_response("Where should I eat on campus?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+        
+        # Advanced features
+        st.markdown("### 🔍 Advanced Features")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            if st.button("🏠 Housing Info", key="housing_info"):
+                st.session_state.chat_history.append({"role": "user", "content": "Tell me about housing options"})
+                ai_response = buddy.generate_response("Tell me about housing options")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+        
+        with col2:
+            if st.button("🏛️ Organizations", key="organizations"):
+                st.session_state.chat_history.append({"role": "user", "content": "What organizations should I join?"})
+                ai_response = buddy.generate_response("What organizations should I join?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+        
+        with col3:
+            if st.button("📰 Latest News", key="latest_news"):
+                st.session_state.chat_history.append({"role": "user", "content": "What's the latest LMU news?"})
+                ai_response = buddy.generate_response("What's the latest LMU news?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+        
+        # Feedback system
+        st.markdown("### 👍 How was your experience?")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("👍 Great!", key="feedback_great"):
+                st.success("Thanks! LMU Buddy is learning and improving! 🦁")
+        with col2:
+            if st.button("👎 Could be better", key="feedback_better"):
+                st.info("Thanks for the feedback! We're constantly working to improve.")
+        with col3:
+            if st.button("🔄 Clear Chat", key="clear_chat"):
+                st.session_state.chat_history = []
+                st.rerun()
     
-    # Suggested questions
-    st.markdown("### 💡 Try asking about:")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        if st.button("🍕 Best food on campus?"):
-            st.session_state.chat_history.append({"role": "user", "content": "Best food on campus?"})
-            ai_response = get_lmu_buddy_response("Best food on campus?")
+    except Exception as e:
+        st.error(f"Error loading Enhanced LMU Buddy: {e}")
+        st.info("Falling back to basic LMU Buddy...")
+        
+        # Fallback to basic chat interface
+        st.markdown("### 💬 Chat with LMU Buddy")
+        
+        # Display chat history
+        for message in st.session_state.chat_history:
+            if message["role"] == "user":
+                st.markdown(f'<div class="user-message">{message["content"]}</div>', unsafe_allow_html=True)
+            else:
+                st.markdown(f'<div class="bot-message">{message["content"]}</div>', unsafe_allow_html=True)
+        
+        # Chat input
+        user_input = st.text_input("Ask LMU Buddy anything...", key="fallback_chat_input")
+        
+        if st.button("Send", key="fallback_send_button") and user_input:
+            # Add user message to history
+            st.session_state.chat_history.append({"role": "user", "content": user_input})
+            
+            # Get AI response
+            ai_response = get_lmu_buddy_response(user_input)
             st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+            
             st.rerun()
-    with col2:
-        if st.button("📚 Best study spots?"):
-            st.session_state.chat_history.append({"role": "user", "content": "Best study spots?"})
-            ai_response = get_lmu_buddy_response("Best study spots?")
-            st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
-            st.rerun()
-    with col3:
-        if st.button("🎉 What's up this weekend?"):
-            st.session_state.chat_history.append({"role": "user", "content": "What's up this weekend?"})
-            ai_response = get_lmu_buddy_response("What's up this weekend?")
-            st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
-            st.rerun()
+        
+        # Suggested questions
+        st.markdown("### 💡 Try asking about:")
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            if st.button("🍕 Best food on campus?", key="fallback_food"):
+                st.session_state.chat_history.append({"role": "user", "content": "Best food on campus?"})
+                ai_response = get_lmu_buddy_response("Best food on campus?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+        with col2:
+            if st.button("📚 Best study spots?", key="fallback_study"):
+                st.session_state.chat_history.append({"role": "user", "content": "Best study spots?"})
+                ai_response = get_lmu_buddy_response("Best study spots?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
+        with col3:
+            if st.button("🎉 What's up this weekend?", key="fallback_weekend"):
+                st.session_state.chat_history.append({"role": "user", "content": "What's up this weekend?"})
+                ai_response = get_lmu_buddy_response("What's up this weekend?")
+                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                st.rerun()
 
 # Waitlist Analytics
 elif selected == "📊 Waitlist":
