@@ -16,3 +16,6 @@ Pillow>=10.0.0
 scikit-learn>=1.3.0
 selenium>=4.15.0
 lxml>=4.9.0
+# Ollama integration dependencies
+subprocess32>=3.5.4
+pathlib2>=2.3.7

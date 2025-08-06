@@ -109,36 +109,55 @@ def get_enhanced_lmu_buddy():
             st.session_state.enhanced_lmu_buddy = EnhancedLMUBuddy()
     return st.session_state.enhanced_lmu_buddy
 
-# LMU Buddy AI responses (fallback)
+# LMU Buddy AI responses with Ollama integration
 def get_lmu_buddy_response(user_input):
+    """Get response from LMU Buddy using fine-tuned Ollama model"""
     try:
-        buddy = get_enhanced_lmu_buddy()
-        return buddy.generate_response(user_input)
+        # Try to use the fine-tuned Ollama model first
+        from lmu_buddy_ollama_client import LMUBuddyOllamaClient
+        
+        # Initialize the client
+        client = LMUBuddyOllamaClient()
+        
+        # Get response from fine-tuned model
+        response = client.get_enhanced_response(user_input)
+        return response
+        
+    except ImportError:
+        # Fallback to enhanced LMU Buddy if Ollama client is not available
+        try:
+            buddy = get_enhanced_lmu_buddy()
+            return buddy.generate_response(user_input)
+        except Exception as e:
+            st.warning("Ollama integration not available. Using fallback responses.")
+            
     except Exception as e:
-        # Fallback to simple responses
-        responses = {
-            "food": "🍕 The best food spots on campus? Hands down, it's the Lair! Their pizza is legendary, and the smoothie bowls at the Lion's Den are perfect for those early morning classes. Pro tip: avoid the rush by going 15 minutes before the lunch crowd hits! 🦁",
-            "study": "📚 Best study spots? The Hannon Library is clutch, especially the quiet zones on the 3rd floor. But my secret spot? The rooftop of the Burns Fine Arts Center - amazing views and usually pretty quiet! Perfect for those late-night cram sessions. ✨",
-            "weekend": "🎉 This weekend? Check out the LMU events calendar! There's always something happening - from Greek life mixers to cultural events. Plus, the farmers market on Sundays is a vibe. Don't forget to follow @lmu_events on Instagram for the latest! 🎊",
-            "greek": "🏛️ Greek Life hacks? Rush season is intense but so worth it! Go to as many events as possible, be yourself, and don't stress about the perfect outfit. The connections you make last way beyond college. Plus, the parties are epic! 🎭",
-            "parking": "🚗 Parking drama? Yeah, it's real. Get there early (like 8 AM early) or park at the Playa Vista shuttle lot. The shuttle runs every 15 minutes and it's free with your student ID. Saves you from the parking ticket stress! 🎫",
-            "default": "🤔 That's a great question! As your LMU Buddy, I'm here to help with everything campus-related. Try asking me about food spots, study locations, weekend events, Greek life, or parking tips! I'm constantly learning more about our amazing campus. 🦁✨"
-        }
-        
-        user_input_lower = user_input.lower()
-        
-        if any(word in user_input_lower for word in ['food', 'eat', 'restaurant', 'dining']):
-            return responses["food"]
-        elif any(word in user_input_lower for word in ['study', 'library', 'quiet', 'spot']):
-            return responses["study"]
-        elif any(word in user_input_lower for word in ['weekend', 'party', 'event', 'fun']):
-            return responses["weekend"]
-        elif any(word in user_input_lower for word in ['greek', 'sorority', 'fraternity', 'rush']):
-            return responses["greek"]
-        elif any(word in user_input_lower for word in ['parking', 'car', 'shuttle']):
-            return responses["parking"]
-        else:
-            return responses["default"]
+        st.error(f"Error getting response from Ollama model: {e}")
+    
+    # Final fallback to simple responses
+    responses = {
+        "food": "🍕 The best food spots on campus? Hands down, it's the Lair! Their pizza is legendary, and the smoothie bowls at the Lion's Den are perfect for those early morning classes. Pro tip: avoid the rush by going 15 minutes before the lunch crowd hits! 🦁",
+        "study": "📚 Best study spots? The Hannon Library is clutch, especially the quiet zones on the 3rd floor. But my secret spot? The rooftop of the Burns Fine Arts Center - amazing views and usually pretty quiet! Perfect for those late-night cram sessions. ✨",
+        "weekend": "🎉 This weekend? Check out the LMU events calendar! There's always something happening - from Greek life mixers to cultural events. Plus, the farmers market on Sundays is a vibe. Don't forget to follow @lmu_events on Instagram for the latest! 🎊",
+        "greek": "🏛️ Greek Life hacks? Rush season is intense but so worth it! Go to as many events as possible, be yourself, and don't stress about the perfect outfit. The connections you make last way beyond college. Plus, the parties are epic! 🎭",
+        "parking": "🚗 Parking drama? Yeah, it's real. Get there early (like 8 AM early) or park at the Playa Vista shuttle lot. The shuttle runs every 15 minutes and it's free with your student ID. Saves you from the parking ticket stress! 🎫",
+        "default": "🤔 That's a great question! As your LMU Buddy, I'm here to help with everything campus-related. Try asking me about food spots, study locations, weekend events, Greek life, or parking tips! I'm constantly learning more about our amazing campus. 🦁✨"
+    }
+    
+    user_input_lower = user_input.lower()
+    
+    if any(word in user_input_lower for word in ['food', 'eat', 'restaurant', 'dining']):
+        return responses["food"]
+    elif any(word in user_input_lower for word in ['study', 'library', 'quiet', 'spot']):
+        return responses["study"]
+    elif any(word in user_input_lower for word in ['weekend', 'party', 'event', 'fun']):
+        return responses["weekend"]
+    elif any(word in user_input_lower for word in ['greek', 'sorority', 'fraternity', 'rush']):
+        return responses["greek"]
+    elif any(word in user_input_lower for word in ['parking', 'car', 'shuttle']):
+        return responses["parking"]
+    else:
+        return responses["default"]
 
 # Navigation
 selected = option_menu(
