@@ -264,32 +264,36 @@ if selected == "🏠 Home":
 
 # LMU Buddy Chat
 elif selected == "🤖 LMU Buddy":
-    st.markdown("""
-    <div class="main-header">
-        <h1>🤖 Meet Enhanced LMU Buddy V2</h1>
-        <p>Your AI campus companion with authentic LMU tea from Reddit & RateMyProfessors!</p>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    # Version selector
-    version = st.selectbox(
-        "Choose LMU Buddy Version:",
-        ["V2 - Enhanced with Reddit/RMP Data", "V1 - Original Enhanced"],
-        help="V2 includes authentic campus tea from Reddit and RateMyProfessors with advanced tone mirroring"
-    )
-    
-    if "V2" in version:
-        # Initialize Enhanced LMU Buddy V2
-        try:
-            buddy = get_enhanced_lmu_buddy_v2()
-        except Exception as e:
-            st.error(f"Error loading Enhanced LMU Buddy V2: {e}")
-            st.info("Falling back to V1...")
-            buddy = get_enhanced_lmu_buddy()
-    else:
-        # Initialize Enhanced LMU Buddy V1
-        try:
-            buddy = get_enhanced_lmu_buddy()
+    try:
+        st.markdown("""
+        <div class="main-header">
+            <h1>🤖 Meet Enhanced LMU Buddy V2</h1>
+            <p>Your AI campus companion with authentic LMU tea from Reddit & RateMyProfessors!</p>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Version selector
+        version = st.selectbox(
+            "Choose LMU Buddy Version:",
+            ["V2 - Enhanced with Reddit/RMP Data", "V1 - Original Enhanced"],
+            help="V2 includes authentic campus tea from Reddit and RateMyProfessors with advanced tone mirroring"
+        )
+        
+        if "V2" in version:
+            # Initialize Enhanced LMU Buddy V2
+            try:
+                buddy = get_enhanced_lmu_buddy_v2()
+            except Exception as e:
+                st.error(f"Error loading Enhanced LMU Buddy V2: {e}")
+                st.info("Falling back to V1...")
+                buddy = get_enhanced_lmu_buddy()
+        else:
+            # Initialize Enhanced LMU Buddy V1
+            try:
+                buddy = get_enhanced_lmu_buddy()
+            except Exception as e:
+                st.error(f"Error loading Enhanced LMU Buddy V1: {e}")
+                st.stop()
         
         # Data insights
         st.markdown("### 📊 LMU Knowledge Base")
