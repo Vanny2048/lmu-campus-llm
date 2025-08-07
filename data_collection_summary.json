@@ -1,15 +1,15 @@
 {
-  "collection_date": "2025-08-07T06:52:15.435272",
+  "collection_date": "2025-08-07T00:16:28.850460",
   "reddit_data": {
-    "total_posts": 0,
-    "campus_tea": 0,
-    "dorm_gossip": 0,
-    "professor_tea": 0,
-    "food_reviews": 0,
-    "event_opinions": 0,
-    "admin_complaints": 0,
-    "campus_slang": 0,
-    "student_experiences": 0
+    "total_posts": 59,
+    "campus_tea": 14,
+    "dorm_gossip": 6,
+    "professor_tea": 5,
+    "food_reviews": 3,
+    "event_opinions": 3,
+    "admin_complaints": 1,
+    "campus_slang": 2,
+    "student_experiences": 25
   },
   "rmp_data": {
     "total_professors": 0,
@@ -27,7 +27,7 @@
     "total_organizations": 6,
     "total_facilities": 5,
     "total_news": 5,
-    "campus_tea": 0,
-    "campus_slang": 0
+    "campus_tea": 14,
+    "campus_slang": 2
   }
 }

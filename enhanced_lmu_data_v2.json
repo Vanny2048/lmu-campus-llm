@@ -1062,12 +1062,102 @@
       "mascot": "Lions"
     }
   ],
+  "campus_tea": [
+    {
+      "type": "campus_tea",
+      "content": "Not Just a Bible Study: A Warning for LMU Students",
+      "details": "**Hey Lions,**\n\nThis is my third time sharing this with you all, and each time, it's been met with support, upvotes, and direct messages from students who’ve said it helped them feel informed and vali...",
+      "popularity": 27
+    },
+    {
+      "type": "campus_tea",
+      "content": "is film and media studies worth it?",
+      "details": "i wanted production as my first choice major but i got accepted to film television and media studies instead. i’ve heard people on campus and on here say major doesnt matter since everyone gets hands-...",
+      "popularity": 10
+    },
+    {
+      "type": "campus_tea",
+      "content": "What every animation student should know -- 10 tips from a recent graduate",
+      "details": "This goes out to any current animation majors at LMU. There's a lot of things about the animation industry that LMU will not be transparent with you about, usually because it's against the interests o...",
+      "popularity": 17
+    },
+    {
+      "type": "dorm_gossip",
+      "content": "Student Apartments",
+      "details": "So Im transfering to LMU this fall but Im still unsure about what apartment to pick as I dont really like dormitories that much. But every apartment that I found like Playa Del Oro, or a few apts in t...",
+      "popularity": 8
+    },
+    {
+      "type": "dorm_gossip",
+      "content": "Solo Dorm at Del Rey North",
+      "details": "hey all, im an incoming freshman student in the honors program who recently was moved from a double in rosecrans to a single in drn (because of the honors llc). is there anything i should worry about ...",
+      "popularity": 5
+    },
+    {
+      "type": "dorm_gossip",
+      "content": "Overnight Guest Policy Question",
+      "details": "I'm planning on visiting my girlfriend at LMU, where she's about to be a first-year living in her dorm. I'd be coming from my college across the country, so staying in her dorm would be the only optio...",
+      "popularity": 5
+    },
+    {
+      "type": "dorm_gossip",
+      "content": "Applied as transfer, put into freshman dorm. Should i worry?",
+      "details": "I’m transferring as a sophomore to LMU this fall (screenwriting), and was hoping to be put into an apartment or housing other than a dorm (just for personal pleasure).\n\nI was placed in Rosecrans hall,...",
+      "popularity": 5
+    },
+    {
+      "type": "dorm_gossip",
+      "content": "Can I switch dorm and roommate before move in? or do I have to wait till semester starts?",
+      "details": "",
+      "popularity": 7
+    },
+    {
+      "type": "dorm_gossip",
+      "content": "screwed over by housing",
+      "details": "did anyone else get screwed over by housing? i'm a sophomore transfer who got placed in a palm south pod double (my last choice) with a roommate other than the one i requested and have been committed ...",
+      "popularity": 9
+    },
+    {
+      "type": "professor_tea",
+      "content": "When should I order textbooks?",
+      "details": "Hello! I’m an incoming freshman, and I was wondering when the best time to order textbooks is. Should I get them now so I have them by the time classes start, or should I wait until classes are in ses...",
+      "popularity": 5
+    },
+    {
+      "type": "professor_tea",
+      "content": "I’m Homeless, Living in a rental car while attending LMU",
+      "details": "I’m a homeless grad student, and I’m starting to lose hope\n\nI’m just so tired of this. It’s been weighing on my mental health more than I can take.\n\nI went back to school because I thought it would gi...",
+      "popularity": 35
+    },
+    {
+      "type": "professor_tea",
+      "content": "Am I cooked? 17+17+17+18 units",
+      "details": "(Upper division transfer)\n\nMy SMC transfer counselors couldn't find the courses that transfer over to LMU, so I have to take 3 extra classes at LMU I could've easily taken at SMC smh. They kept pushin...",
+      "popularity": 5
+    },
+    {
+      "type": "professor_tea",
+      "content": "For Parents, Family members, friends, &amp; Attendees: Recap of  2025 and Tips for Graduation (Commencement) Ceremony &amp; Events",
+      "details": "I looked through Reddit and LMU's website to plan for my youngest graduation events, celebrations, and ceremony and couldn't find the answers. So from my personal experiences, I am sharing them.\n\n* Fl...",
+      "popularity": 9
+    },
+    {
+      "type": "professor_tea",
+      "content": "What every animation student should know -- 10 tips from a recent graduate",
+      "details": "This goes out to any current animation majors at LMU. There's a lot of things about the animation industry that LMU will not be transparent with you about, usually because it's against the interests o...",
+      "popularity": 17
+    }
+  ],
+  "campus_slang": [
+    "LMU",
+    "Del Rey"
+  ],
   "metadata": {
-    "last_updated": "2025-08-07T06:52:15.434294",
-    "reddit_posts_collected": 0,
+    "last_updated": "2025-08-07T00:16:28.847386",
+    "reddit_posts_collected": 59,
     "professors_collected": 0,
-    "campus_tea_count": 0,
-    "slang_count": 0,
+    "campus_tea_count": 14,
+    "slang_count": 2,
     "data_sources": [
       "reddit",
       "ratemyprofessors",
