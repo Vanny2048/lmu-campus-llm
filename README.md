@@ -4,8 +4,17 @@
 
 ## 🚀 Quick Start
 
-### Option 1: Basic Setup (No Fine-tuning)
+### Prerequisites
+- Python 3.8 or higher
+- 8GB+ RAM (for Ollama models)
+- Internet connection
+
+### Basic Setup (No Fine-tuning)
 ```bash
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
 # Install dependencies
 pip install -r requirements.txt
 
@@ -13,13 +22,11 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-### Option 2: Full Setup with Fine-tuned AI (Recommended)
+### Full Setup with Fine-tuned AI (Recommended)
 ```bash
-# Automated setup with Ollama fine-tuning
-python3 setup_fine_tuning.py
-
-# Or manual setup:
 # 1. Install dependencies
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 
 # 2. Install Ollama
@@ -31,8 +38,8 @@ ollama serve &
 # 4. Pull base model
 ollama pull llama2:7b
 
-# 5. Test integration
-python3 quick_test.py
+# 5. Run fine-tuning (optional)
+python3 fine_tune_lmu_buddy.py
 
 # 6. Run the app
 streamlit run app.py
@@ -72,65 +79,40 @@ streamlit run app.py
    ```
 
 ### Deploy with Docker
-```dockerfile
-# Dockerfile
-FROM python:3.9-slim
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Ollama
-RUN curl -fsSL https://ollama.ai/install.sh | sh
-
-# Copy application files
-COPY . /app
-WORKDIR /app
-
-# Install Python dependencies
-RUN pip install -r requirements.txt
-
-# Expose ports
-EXPOSE 8501 11434
-
-# Start services
-CMD ["sh", "-c", "ollama serve & sleep 10 && ollama pull llama2:7b && streamlit run app.py --server.port 8501 --server.address 0.0.0.0"]
+```bash
+# Build and run with Docker
+docker build -t lmu-buddy .
+docker run -p 8501:8501 -p 11434:11434 lmu-buddy
 ```
-
-### Deploy to Railway/Heroku
-1. **Add Ollama buildpack** (if supported)
-2. **Set environment variables**:
-   ```
-   OLLAMA_HOST=0.0.0.0
-   OLLAMA_ORIGINS=*
-   ```
-3. **Deploy with Procfile**:
-   ```
-   web: ollama serve & sleep 10 && ollama pull llama2:7b && streamlit run app.py --server.port $PORT --server.address 0.0.0.0
-   ```
 
 ## 🔧 Fine-tuning Your LMU Buddy
 
-### Quick Fine-tuning Setup
+### Quick Fine-tuning
 ```bash
-# Run automated fine-tuning
-python3 setup_fine_tuning.py
+# Run the fine-tuning script
+python3 fine_tune_lmu_buddy.py
 ```
 
 ### Manual Fine-tuning Process
-1. **Create training data**:
+1. **Ensure Ollama is running**:
+   ```bash
+   ollama serve &
+   ```
+
+2. **Pull base model**:
+   ```bash
+   ollama pull llama2:7b
+   ```
+
+3. **Run fine-tuning**:
    ```bash
    python3 fine_tune_lmu_buddy.py
    ```
 
-2. **Test the model**:
+4. **Test the model**:
    ```bash
-   python3 test_fine_tuned_model.py
+   ollama run lmu-buddy "Where should I eat on campus?"
    ```
-
-3. **Use in your app**:
-   The app automatically integrates with the fine-tuned model!
 
 ### Customize Training Data
 Edit `fine_tune_lmu_buddy.py` to add more conversational examples:
@@ -175,7 +157,7 @@ conversations = [
 ## 🛠️ Technical Stack
 
 - **Frontend**: Streamlit (Python)
-- **AI/ML**: Sentence Transformers, FAISS
+- **AI/ML**: Sentence Transformers, FAISS, Ollama
 - **Data Storage**: JSON files
 - **Styling**: Custom CSS with LMU branding
 
@@ -194,19 +176,14 @@ lmu-campus-llm/
 ├── 🔧 Fine-tuning Files
 ├── fine_tune_lmu_buddy.py          # Main fine-tuning script
 ├── lmu_buddy_ollama_client.py      # Ollama integration client
-├── setup_fine_tuning.py            # Automated setup script
-├── test_fine_tuned_model.py        # Model testing suite
-├── create_simple_modelfile.py      # Modelfile generator
-├── create_model_via_api.py         # API-based model creation
-├── quick_test.py                   # Quick integration test
-├── FINE_TUNING_README.md           # Fine-tuning documentation
-│
-├── 📄 Generated Files (after fine-tuning)
 ├── Modelfile                       # Ollama model configuration
 ├── lmu_buddy_training_data.json    # Training data
-├── minimal_modelfile.txt           # Minimal test modelfile
-├── test_modelfile.txt              # Test modelfile
-└── Dockerfile                      # Docker deployment (optional)
+│
+├── 📄 Configuration Files
+├── .streamlit/config.toml          # Streamlit configuration
+├── Dockerfile                      # Docker deployment
+├── .gitignore                      # Git ignore rules
+└── .dockerignore                   # Docker ignore rules
 ```
 
 ## 🎯 What Makes This Special
@@ -230,6 +207,13 @@ Edit the CSS in `app.py` to change:
 - Layout and design
 - Mobile responsiveness
 
+### Update Campus Data
+Edit `enhanced_lmu_data.json` or run `enhanced_lmu_scraper.py` to:
+- Add new professors
+- Update course information
+- Refresh dining options
+- Add new events
+
 ## 🚨 Troubleshooting
 
 ### Ollama Issues
@@ -249,11 +233,8 @@ ollama pull llama2:7b
 
 ### Fine-tuning Issues
 ```bash
-# Test the integration
-python3 quick_test.py
-
 # Check model availability
-python3 test_fine_tuned_model.py
+ollama list
 
 # Recreate model if needed
 ollama rm lmu-buddy
@@ -274,7 +255,6 @@ python3 fine_tune_lmu_buddy.py
 ## 📞 Support
 
 - **Issues**: GitHub Issues
-- **Email**: [your-email@lmu.edu]
 - **Documentation**: See `FINE_TUNING_README.md` for detailed fine-tuning guide
 
 ---
