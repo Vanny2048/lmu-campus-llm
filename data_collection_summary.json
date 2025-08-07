@@ -1,0 +1,33 @@
+{
+  "collection_date": "2025-08-07T06:52:15.435272",
+  "reddit_data": {
+    "total_posts": 0,
+    "campus_tea": 0,
+    "dorm_gossip": 0,
+    "professor_tea": 0,
+    "food_reviews": 0,
+    "event_opinions": 0,
+    "admin_complaints": 0,
+    "campus_slang": 0,
+    "student_experiences": 0
+  },
+  "rmp_data": {
+    "total_professors": 0,
+    "professors_with_ratings": 0,
+    "average_rating": 0.0,
+    "total_reviews": 0,
+    "professor_tea": 0
+  },
+  "enhanced_data": {
+    "total_professors": 8,
+    "total_courses": 8,
+    "total_dining": 5,
+    "total_housing": 5,
+    "total_events": 6,
+    "total_organizations": 6,
+    "total_facilities": 5,
+    "total_news": 5,
+    "campus_tea": 0,
+    "campus_slang": 0
+  }
+}

@@ -1,6 +1,6 @@
-# 🦁 LMU Campus LLM - Bring Back the Roar!
+# 🦁 LMU Campus LLM V2 - Enhanced with Authentic Campus Tea!
 
-> **Your personal AI buddy for everything LMU - from the best food spots to study hacks!**
+> **Your AI buddy for everything LMU - now with REAL student experiences from Reddit & RateMyProfessors!**
 
 ## 🚀 Quick Start
 
@@ -22,27 +22,20 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-### Full Setup with Fine-tuned AI (Recommended)
+### Enhanced Setup with Authentic Data (Recommended)
 ```bash
 # 1. Install dependencies
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# 2. Install Ollama
-curl -fsSL https://ollama.ai/install.sh | sh
+# 2. Collect authentic LMU data
+python3 collect_lmu_data.py
 
-# 3. Start Ollama service
-ollama serve &
-
-# 4. Pull base model
-ollama pull llama2:7b
-
-# 5. Run fine-tuning (optional)
-python3 fine_tune_lmu_buddy.py
-
-# 6. Run the app
+# 3. Run the enhanced app
 streamlit run app.py
+
+# 4. Choose "V2 - Enhanced with Reddit/RMP Data" in the app
 ```
 
 ## 🌐 Deployment Options
@@ -133,14 +126,14 @@ conversations = [
 
 ## ✨ Features
 
-### 🤖 **LMU Buddy AI Chatbot**
-- **Fine-tuned with Ollama** - Custom LMU Buddy personality and responses
-- **Mirrors your tone** - If you're formal, it's formal. If you're casual, it's casual!
-- **Intimate LMU knowledge** - Knows every detail about campus life
-- **Better than ChatGPT** for LMU-specific questions
-- **GenZ personality** with emojis and campus slang
-- **RAG-powered responses** using comprehensive LMU knowledge base
-- **Fallback support** - Works with or without Ollama fine-tuning
+### 🤖 **Enhanced LMU Buddy V2**
+- **Advanced Tone Mirroring** - Analyzes and mirrors your exact communication style
+- **Authentic Campus Tea** - Real student experiences from Reddit & RateMyProfessors
+- **Gen-Z Voice** - Speaks like a real LMU student with authentic slang and emojis
+- **Smart Context** - Remembers your major, dorm, and preferences over time
+- **Real-time Data** - Fresh campus gossip and professor reviews
+- **Tone Analysis Dashboard** - Visual feedback on your communication style
+- **Dual Version Support** - Choose between V1 (original) and V2 (enhanced)
 
 ### 🏠 **Landing Page + Waitlist**
 - **Viral-ready landing page** with LMU branding
@@ -157,27 +150,31 @@ conversations = [
 ## 🛠️ Technical Stack
 
 - **Frontend**: Streamlit (Python)
-- **AI/ML**: Sentence Transformers, FAISS, Ollama
-- **Data Storage**: JSON files
+- **AI/ML**: Sentence Transformers, Semantic Search, Tone Analysis
+- **Data Collection**: Reddit API, RateMyProfessors Scraping
+- **Data Storage**: JSON files with real-time updates
 - **Styling**: Custom CSS with LMU branding
 
 ## 📁 Project Structure
 
 ```
 lmu-campus-llm/
-├── app.py                           # Main Streamlit application
-├── enhanced_lmu_buddy.py            # AI chatbot with tone mirroring
+├── app.py                           # Main Streamlit application with V1/V2 selection
+├── enhanced_lmu_buddy.py            # Original AI chatbot (V1)
+├── enhanced_lmu_buddy_v2.py         # Enhanced AI chatbot with tone mirroring (V2)
 ├── requirements.txt                 # Python dependencies
 ├── waitlist.json                   # Waitlist data (auto-generated)
 ├── lmu_embeddings.pkl              # AI embeddings (auto-generated)
-├── enhanced_lmu_data.json          # LMU campus data
-├── enhanced_lmu_scraper.py         # Data scraper for LMU information
+├── enhanced_lmu_data.json          # Original LMU campus data
+├── enhanced_lmu_data_v2.json       # Enhanced LMU data with Reddit/RMP content
 │
-├── 🔧 Fine-tuning Files
-├── fine_tune_lmu_buddy.py          # Main fine-tuning script
-├── lmu_buddy_ollama_client.py      # Ollama integration client
-├── Modelfile                       # Ollama model configuration
-├── lmu_buddy_training_data.json    # Training data
+├── 📱 Data Collection Files
+├── lmu_reddit_scraper.py           # Reddit data collection for authentic campus tea
+├── lmu_rmp_scraper.py              # RateMyProfessors data collection
+├── collect_lmu_data.py             # Combined data collection script
+├── lmu_reddit_data.json            # Reddit scraped data (auto-generated)
+├── lmu_rmp_data.json               # RMP scraped data (auto-generated)
+├── data_collection_summary.json    # Collection summary report
 │
 ├── 📄 Configuration Files
 ├── .streamlit/config.toml          # Streamlit configuration
@@ -188,18 +185,20 @@ lmu-campus-llm/
 
 ## 🎯 What Makes This Special
 
-1. **Tone Mirroring**: The chatbot analyzes your writing style and matches it
-2. **Intimate Knowledge**: Knows campus secrets, hidden gems, and student gossip
-3. **GenZ Voice**: Speaks like a real LMU student, not a boring FAQ
-4. **Waitlist Growth**: Built-in viral features to grow the community
+1. **Advanced Tone Mirroring**: Analyzes your writing style with multiple indicators and mirrors it perfectly
+2. **Authentic Campus Tea**: Real student experiences from Reddit and RateMyProfessors, not generic responses
+3. **Gen-Z Voice**: Speaks like a real LMU student with authentic slang, emojis, and campus culture
+4. **Smart Personalization**: Remembers your major, dorm, and preferences over time
+5. **Real-time Data**: Fresh campus gossip and professor reviews, always up-to-date
+6. **Dual Version Support**: Choose between V1 (original) and V2 (enhanced) based on your needs
 
 ## 🔧 Customization
 
 ### Update AI Responses
-Edit `enhanced_lmu_buddy.py` to modify:
-- Tone detection logic
-- Response generation
-- Campus knowledge base
+Edit `enhanced_lmu_buddy_v2.py` to modify:
+- Advanced tone detection logic
+- Response generation with authentic tea
+- Campus knowledge base with Reddit/RMP data
 
 ### Update Styling
 Edit the CSS in `app.py` to change:
@@ -208,37 +207,36 @@ Edit the CSS in `app.py` to change:
 - Mobile responsiveness
 
 ### Update Campus Data
-Edit `enhanced_lmu_data.json` or run `enhanced_lmu_scraper.py` to:
-- Add new professors
-- Update course information
-- Refresh dining options
-- Add new events
+Run `collect_lmu_data.py` to get fresh authentic data:
+- Collect new Reddit posts for campus tea
+- Update professor reviews from RateMyProfessors
+- Refresh dining reviews and recommendations
+- Get latest event opinions and TNL feedback
 
 ## 🚨 Troubleshooting
 
-### Ollama Issues
+### Data Collection Issues
 ```bash
-# Check if Ollama is running
-curl http://localhost:11434/api/tags
+# Check if scrapers are working
+python3 lmu_reddit_scraper.py
+python3 lmu_rmp_scraper.py
 
-# Restart Ollama service
-ollama serve &
+# Verify data files exist
+ls -la *.json
 
-# Check available models
-ollama list
-
-# Pull base model if missing
-ollama pull llama2:7b
+# Regenerate all data
+python3 collect_lmu_data.py
 ```
 
-### Fine-tuning Issues
+### Tone Analysis Issues
 ```bash
-# Check model availability
-ollama list
-
-# Recreate model if needed
-ollama rm lmu-buddy
-python3 fine_tune_lmu_buddy.py
+# Test tone detection
+python3 -c "
+from enhanced_lmu_buddy_v2 import EnhancedLMUBuddyV2
+buddy = EnhancedLMUBuddyV2()
+scores = buddy.analyze_user_tone('Yo what\'s up?')
+print(scores)
+"
 ```
 
 ### Deployment Issues
@@ -248,17 +246,19 @@ python3 fine_tune_lmu_buddy.py
 - **Timeout errors**: Increase timeout values in client code
 
 ### Performance Optimization
-- **Slow responses**: Use `llama2:7b` instead of `llama2:13b`
-- **Memory issues**: Ensure 8GB+ RAM for Ollama
-- **Storage**: Use SSD for faster model loading
+- **Slow responses**: Clear embeddings cache with `rm lmu_embeddings.pkl`
+- **Memory issues**: Ensure 8GB+ RAM for embeddings
+- **Storage**: Use SSD for faster data processing
+- **Data freshness**: Run `collect_lmu_data.py` regularly for updated content
 
 ## 📞 Support
 
 - **Issues**: GitHub Issues
-- **Documentation**: See `FINE_TUNING_README.md` for detailed fine-tuning guide
+- **Documentation**: See `README_ENHANCED.md` for detailed V2 features
+- **Data Updates**: Run `collect_lmu_data.py` for fresh campus tea
 
 ---
 
-**🦁 Ready to Bring Back the Roar? Deploy now and start building the LMU community!**
+**🦁 Ready to experience the most authentic LMU AI? Deploy V2 and start chatting with real campus tea!**
 
-*Built with ❤️ for the LMU community*
+*Built with ❤️ for the LMU community - Bringing Back the Roar!*

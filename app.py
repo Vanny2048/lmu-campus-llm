@@ -101,6 +101,7 @@ def save_waitlist(data):
 
 # Import enhanced LMU Buddy
 from enhanced_lmu_buddy import EnhancedLMUBuddy
+from enhanced_lmu_buddy_v2 import EnhancedLMUBuddyV2
 
 # Initialize Enhanced LMU Buddy
 def get_enhanced_lmu_buddy():
@@ -108,6 +109,13 @@ def get_enhanced_lmu_buddy():
         with st.spinner("Loading LMU Buddy... This may take a moment on first run."):
             st.session_state.enhanced_lmu_buddy = EnhancedLMUBuddy()
     return st.session_state.enhanced_lmu_buddy
+
+# Initialize Enhanced LMU Buddy V2
+def get_enhanced_lmu_buddy_v2():
+    if 'enhanced_lmu_buddy_v2' not in st.session_state:
+        with st.spinner("Loading Enhanced LMU Buddy V2... This may take a moment on first run."):
+            st.session_state.enhanced_lmu_buddy_v2 = EnhancedLMUBuddyV2()
+    return st.session_state.enhanced_lmu_buddy_v2
 
 # LMU Buddy AI responses with Ollama integration
 def get_lmu_buddy_response(user_input):
@@ -258,14 +266,30 @@ if selected == "🏠 Home":
 elif selected == "🤖 LMU Buddy":
     st.markdown("""
     <div class="main-header">
-        <h1>🤖 Meet Enhanced LMU Buddy</h1>
-        <p>Your AI campus companion with comprehensive LMU knowledge!</p>
+        <h1>🤖 Meet Enhanced LMU Buddy V2</h1>
+        <p>Your AI campus companion with authentic LMU tea from Reddit & RateMyProfessors!</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Initialize Enhanced LMU Buddy
-    try:
-        buddy = get_enhanced_lmu_buddy()
+    # Version selector
+    version = st.selectbox(
+        "Choose LMU Buddy Version:",
+        ["V2 - Enhanced with Reddit/RMP Data", "V1 - Original Enhanced"],
+        help="V2 includes authentic campus tea from Reddit and RateMyProfessors with advanced tone mirroring"
+    )
+    
+    if "V2" in version:
+        # Initialize Enhanced LMU Buddy V2
+        try:
+            buddy = get_enhanced_lmu_buddy_v2()
+        except Exception as e:
+            st.error(f"Error loading Enhanced LMU Buddy V2: {e}")
+            st.info("Falling back to V1...")
+            buddy = get_enhanced_lmu_buddy()
+    else:
+        # Initialize Enhanced LMU Buddy V1
+        try:
+            buddy = get_enhanced_lmu_buddy()
         
         # Data insights
         st.markdown("### 📊 LMU Knowledge Base")
@@ -282,6 +306,23 @@ elif selected == "🤖 LMU Buddy":
         # Chat interface
         st.markdown("### 💬 Chat with Enhanced LMU Buddy")
         
+        # Tone analysis display (for V2)
+        if "V2" in version and hasattr(buddy, 'analyze_user_tone'):
+            if st.session_state.get('last_user_input'):
+                tone_scores = buddy.analyze_user_tone(st.session_state.last_user_input)
+                dominant_tone = buddy.get_dominant_tone(tone_scores)
+                
+                st.markdown("#### 🎭 Tone Analysis")
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    st.metric("Casual", f"{tone_scores.get('casual', 0):.1%}")
+                with col2:
+                    st.metric("Formal", f"{tone_scores.get('formal', 0):.1%}")
+                with col3:
+                    st.metric("Academic", f"{tone_scores.get('academic', 0):.1%}")
+                
+                st.info(f"**Detected Tone:** {dominant_tone.title()}")
+        
         # Display chat history
         for message in st.session_state.chat_history:
             if message["role"] == "user":
@@ -293,6 +334,9 @@ elif selected == "🤖 LMU Buddy":
         user_input = st.text_input("Ask Enhanced LMU Buddy anything...", key="chat_input")
         
         if st.button("Send", key="send_button") and user_input:
+            # Store last user input for tone analysis
+            st.session_state.last_user_input = user_input
+            
             # Add user message to history
             st.session_state.chat_history.append({"role": "user", "content": user_input})
             
@@ -306,35 +350,88 @@ elif selected == "🤖 LMU Buddy":
         # Quick access buttons
         st.markdown("### 🚀 Quick Access")
         
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            st.markdown("**📚 Academic**")
-            if st.button("Find Professors", key="find_professors"):
-                st.session_state.chat_history.append({"role": "user", "content": "Show me some good professors"})
-                ai_response = buddy.generate_response("Show me some good professors")
-                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
-                st.rerun()
+        if "V2" in version:
+            # V2 specific buttons with authentic tea
+            col1, col2, col3 = st.columns(3)
             
-            if st.button("Popular Courses", key="popular_courses"):
-                st.session_state.chat_history.append({"role": "user", "content": "What are some popular courses?"})
-                ai_response = buddy.generate_response("What are some popular courses?")
-                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
-                st.rerun()
-        
-        with col2:
-            st.markdown("**🎉 Campus Life**")
-            if st.button("Upcoming Events", key="upcoming_events"):
-                st.session_state.chat_history.append({"role": "user", "content": "What events are coming up?"})
-                ai_response = buddy.generate_response("What events are coming up?")
-                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
-                st.rerun()
+            with col1:
+                st.markdown("**🍕 Authentic Tea**")
+                if st.button("🍕 Food Tea", key="food_tea_v2"):
+                    st.session_state.last_user_input = "Tell me about the food on campus"
+                    st.session_state.chat_history.append({"role": "user", "content": "Tell me about the food on campus"})
+                    ai_response = buddy.generate_response("Tell me about the food on campus")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+                
+                if st.button("👻 Dorm Gossip", key="dorm_gossip_v2"):
+                    st.session_state.last_user_input = "What's the tea about the dorms?"
+                    st.session_state.chat_history.append({"role": "user", "content": "What's the tea about the dorms?"})
+                    ai_response = buddy.generate_response("What's the tea about the dorms?")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
             
-            if st.button("Best Food Spots", key="best_food"):
-                st.session_state.chat_history.append({"role": "user", "content": "Where should I eat on campus?"})
-                ai_response = buddy.generate_response("Where should I eat on campus?")
-                st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
-                st.rerun()
+            with col2:
+                st.markdown("**👨‍🏫 Professor Tea**")
+                if st.button("👨‍🏫 Professor Tea", key="prof_tea_v2"):
+                    st.session_state.last_user_input = "Tell me about the professors"
+                    st.session_state.chat_history.append({"role": "user", "content": "Tell me about the professors"})
+                    ai_response = buddy.generate_response("Tell me about the professors")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+                
+                if st.button("🏛️ Admin Complaints", key="admin_complaints_v2"):
+                    st.session_state.last_user_input = "What are the biggest complaints about admin?"
+                    st.session_state.chat_history.append({"role": "user", "content": "What are the biggest complaints about admin?"})
+                    ai_response = buddy.generate_response("What are the biggest complaints about admin?")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+            
+            with col3:
+                st.markdown("**🎉 Campus Life**")
+                if st.button("🎵 TNL Events", key="tnl_events_v2"):
+                    st.session_state.last_user_input = "What's up with TNL events?"
+                    st.session_state.chat_history.append({"role": "user", "content": "What's up with TNL events?"})
+                    ai_response = buddy.generate_response("What's up with TNL events?")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+                
+                if st.button("🏀 Basketball Games", key="basketball_v2"):
+                    st.session_state.last_user_input = "Tell me about basketball games"
+                    st.session_state.chat_history.append({"role": "user", "content": "Tell me about basketball games"})
+                    ai_response = buddy.generate_response("Tell me about basketball games")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+        else:
+            # V1 buttons
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                st.markdown("**📚 Academic**")
+                if st.button("Find Professors", key="find_professors"):
+                    st.session_state.chat_history.append({"role": "user", "content": "Show me some good professors"})
+                    ai_response = buddy.generate_response("Show me some good professors")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+                
+                if st.button("Popular Courses", key="popular_courses"):
+                    st.session_state.chat_history.append({"role": "user", "content": "What are some popular courses?"})
+                    ai_response = buddy.generate_response("What are some popular courses?")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+            
+            with col2:
+                st.markdown("**🎉 Campus Life**")
+                if st.button("Upcoming Events", key="upcoming_events"):
+                    st.session_state.chat_history.append({"role": "user", "content": "What events are coming up?"})
+                    ai_response = buddy.generate_response("What events are coming up?")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
+                
+                if st.button("Best Food Spots", key="best_food"):
+                    st.session_state.chat_history.append({"role": "user", "content": "Where should I eat on campus?"})
+                    ai_response = buddy.generate_response("Where should I eat on campus?")
+                    st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+                    st.rerun()
         
         # Advanced features
         st.markdown("### 🔍 Advanced Features")

@@ -1,0 +1,26 @@
+{
+  "scraped_at": "2025-08-07T06:52:14.953697",
+  "data": {
+    "campus_tea": [],
+    "dorm_gossip": [],
+    "professor_tea": [],
+    "food_reviews": [],
+    "event_opinions": [],
+    "admin_complaints": [],
+    "campus_slang": [],
+    "student_experiences": []
+  },
+  "campus_tea": [],
+  "slang": [],
+  "summary": {
+    "total_posts": 0,
+    "campus_tea_count": 0,
+    "dorm_gossip_count": 0,
+    "professor_tea_count": 0,
+    "food_reviews_count": 0,
+    "event_opinions_count": 0,
+    "admin_complaints_count": 0,
+    "campus_slang_count": 0,
+    "student_experiences_count": 0
+  }
+}
