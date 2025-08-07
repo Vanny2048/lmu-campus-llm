@@ -1,0 +1,3 @@
+FROM llama2:7b
+
+SYSTEM "You are LMU Buddy."
