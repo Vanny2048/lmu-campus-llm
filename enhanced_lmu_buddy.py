@@ -199,7 +199,17 @@ class EnhancedLMUBuddy:
         """Load pre-computed embeddings or compute new ones"""
         try:
             with open('lmu_embeddings.pkl', 'rb') as f:
-                return pickle.load(f)
+                data = pickle.load(f)
+                # Handle both tuple and dict formats
+                if isinstance(data, tuple) and len(data) == 2:
+                    return {
+                        'embeddings': data[0],
+                        'text_mapping': data[1]
+                    }
+                elif isinstance(data, dict):
+                    return data
+                else:
+                    raise ValueError("Invalid embeddings file format")
         except FileNotFoundError:
             return self.compute_embeddings()
     
@@ -284,12 +294,26 @@ class EnhancedLMUBuddy:
         results = []
         for idx in top_indices:
             if similarities[idx] > 0.3:  # Threshold for relevance
-                category, data = self.embeddings['text_mapping'][idx]
-                results.append({
-                    'category': category,
-                    'data': data,
-                    'similarity': similarities[idx]
-                })
+                try:
+                    # Handle both tuple and dict formats
+                    mapping_item = self.embeddings['text_mapping'][idx]
+                    if isinstance(mapping_item, tuple) and len(mapping_item) == 2:
+                        category, data = mapping_item
+                    elif isinstance(mapping_item, dict):
+                        category = mapping_item.get('category', 'unknown')
+                        data = mapping_item.get('data', mapping_item)
+                    else:
+                        category = 'unknown'
+                        data = mapping_item
+                    
+                    results.append({
+                        'category': category,
+                        'data': data,
+                        'similarity': similarities[idx]
+                    })
+                except Exception as e:
+                    # Skip this result if there's an error
+                    continue
         
         return results
     
@@ -801,34 +825,43 @@ class EnhancedLMUBuddy:
                 dining_info = best_result['data']
                 
                 if tone == 'casual':
-                    response = f"🍕 **{dining_info['name']}** - The {dining_info['type']} Spot! 🍕\n\n"
-                    response += f"📍 Location: {dining_info['location']}\n"
-                    response += f"⭐ Rating: {dining_info['rating']}/5.0\n"
-                    response += f"💰 Price Range: {dining_info['price_range']}\n\n"
+                    response = f"🍕 **{dining_info.get('name', 'Unknown')}** - The {dining_info.get('type', 'Dining')} Spot! 🍕\n\n"
+                    if 'location' in dining_info:
+                        response += f"📍 Location: {dining_info['location']}\n"
+                    if 'rating' in dining_info:
+                        response += f"⭐ Rating: {dining_info['rating']}/5.0\n"
+                    if 'price_range' in dining_info:
+                        response += f"💰 Price Range: {dining_info['price_range']}\n\n"
                     response += f"🔥 **Must-Try Items:**\n"
                     for item in dining_info.get('popular_items', [])[:3]:
                         response += f"• {item}\n"
-                    response += f"\n💡 **Pro Tip**: {dining_info['name']} is {random.choice(['always packed during lunch', 'best during off-peak hours', 'perfect for late-night cravings', 'great for group hangouts'])}! {random.choice(personality['excitement'])}\n\n"
+                    response += f"\n💡 **Pro Tip**: {dining_info.get('name', 'This place')} is {random.choice(['always packed during lunch', 'best during off-peak hours', 'perfect for late-night cravings', 'great for group hangouts'])}! {random.choice(personality['excitement'])}\n\n"
                     response += "🎯 **Student Gossip**: Rumor has it they're planning to add some new menu items next semester!"
                 elif tone == 'formal':
-                    response = f"🍕 **{dining_info['name']}** - {dining_info['type']} Establishment 🍕\n\n"
-                    response += f"📍 Location: {dining_info['location']}\n"
-                    response += f"⭐ Rating: {dining_info['rating']}/5.0\n"
-                    response += f"💰 Price Range: {dining_info['price_range']}\n\n"
+                    response = f"🍕 **{dining_info.get('name', 'Unknown')}** - {dining_info.get('type', 'Dining')} Establishment 🍕\n\n"
+                    if 'location' in dining_info:
+                        response += f"📍 Location: {dining_info['location']}\n"
+                    if 'rating' in dining_info:
+                        response += f"⭐ Rating: {dining_info['rating']}/5.0\n"
+                    if 'price_range' in dining_info:
+                        response += f"💰 Price Range: {dining_info['price_range']}\n\n"
                     response += f"📋 **Popular Menu Items:**\n"
                     for item in dining_info.get('popular_items', [])[:3]:
                         response += f"• {item}\n"
-                    response += f"\n💡 **Recommendation**: {dining_info['name']} is known for its consistent quality and student-friendly pricing.\n\n"
+                    response += f"\n💡 **Recommendation**: {dining_info.get('name', 'This establishment')} is known for its consistent quality and student-friendly pricing.\n\n"
                     response += "📚 **Note**: This establishment is popular among students and faculty alike."
                 else:
-                    response = f"🍕 **{dining_info['name']}** - {dining_info['type']} 🍕\n\n"
-                    response += f"📍 Location: {dining_info['location']}\n"
-                    response += f"⭐ Rating: {dining_info['rating']}/5.0\n"
-                    response += f"💰 Price Range: {dining_info['price_range']}\n\n"
+                    response = f"🍕 **{dining_info.get('name', 'Unknown')}** - {dining_info.get('type', 'Dining')} 🍕\n\n"
+                    if 'location' in dining_info:
+                        response += f"📍 Location: {dining_info['location']}\n"
+                    if 'rating' in dining_info:
+                        response += f"⭐ Rating: {dining_info['rating']}/5.0\n"
+                    if 'price_range' in dining_info:
+                        response += f"💰 Price Range: {dining_info['price_range']}\n\n"
                     response += f"🔥 **Popular Items:**\n"
                     for item in dining_info.get('popular_items', [])[:3]:
                         response += f"• {item}\n"
-                    response += f"\n💡 **Pro Tip**: {dining_info['name']} is a great spot for {random.choice(['lunch with friends', 'quick meals between classes', 'late-night study snacks', 'group dining'])}! 🦁\n\n"
+                    response += f"\n💡 **Pro Tip**: {dining_info.get('name', 'This place')} is a great spot for {random.choice(['lunch with friends', 'quick meals between classes', 'late-night study snacks', 'group dining'])}! 🦁\n\n"
                     response += "🎯 **Campus Insight**: This place is always buzzing with students!"
                 
                 response += f"\n\n{self.get_lmu_insight('student_life', tone)}"
@@ -1092,31 +1125,37 @@ class EnhancedLMUBuddy:
                 facility_info = best_result['data']
                 
                 if tone == 'casual':
-                    response = f"🏢 **{facility_info['name']}** - {facility_info['type']} Spot! 🏢\n\n"
-                    response += f"📍 Location: {facility_info['location']}\n"
-                    response += f"⭐ Rating: {facility_info['rating']}/5.0\n\n"
+                    response = f"🏢 **{facility_info.get('name', 'Unknown')}** - {facility_info.get('type', 'Facility')} Spot! 🏢\n\n"
+                    if 'location' in facility_info:
+                        response += f"📍 Location: {facility_info['location']}\n"
+                    if 'rating' in facility_info:
+                        response += f"⭐ Rating: {facility_info['rating']}/5.0\n\n"
                     response += f"🔥 **What's Cool Here:**\n"
                     for feature in facility_info.get('features', [])[:3]:
                         response += f"• {feature}\n"
-                    response += f"\n💡 **Pro Tip**: {facility_info['name']} is {random.choice(['perfect for studying', 'great for hanging out', 'awesome for events', 'super convenient'])}! {random.choice(personality['excitement'])}\n\n"
+                    response += f"\n💡 **Pro Tip**: {facility_info.get('name', 'This place')} is {random.choice(['perfect for studying', 'great for hanging out', 'awesome for events', 'super convenient'])}! {random.choice(personality['excitement'])}\n\n"
                     response += "🎯 **Student Gossip**: This is definitely one of the best spots on campus!"
                 elif tone == 'formal':
-                    response = f"🏢 **{facility_info['name']}** - {facility_info['type']} Facility 🏢\n\n"
-                    response += f"📍 Location: {facility_info['location']}\n"
-                    response += f"⭐ Rating: {facility_info['rating']}/5.0\n\n"
+                    response = f"🏢 **{facility_info.get('name', 'Unknown')}** - {facility_info.get('type', 'Facility')} Facility 🏢\n\n"
+                    if 'location' in facility_info:
+                        response += f"📍 Location: {facility_info['location']}\n"
+                    if 'rating' in facility_info:
+                        response += f"⭐ Rating: {facility_info['rating']}/5.0\n\n"
                     response += f"📋 **Available Features:**\n"
                     for feature in facility_info.get('features', [])[:3]:
                         response += f"• {feature}\n"
-                    response += f"\n💡 **Recommendation**: {facility_info['name']} provides excellent resources and amenities for student use.\n\n"
+                    response += f"\n💡 **Recommendation**: {facility_info.get('name', 'This facility')} provides excellent resources and amenities for student use.\n\n"
                     response += "📚 **Note**: This facility is highly utilized by the campus community."
                 else:
-                    response = f"🏢 **{facility_info['name']}** - {facility_info['type']} 🏢\n\n"
-                    response += f"📍 Location: {facility_info['location']}\n"
-                    response += f"⭐ Rating: {facility_info['rating']}/5.0\n\n"
+                    response = f"🏢 **{facility_info.get('name', 'Unknown')}** - {facility_info.get('type', 'Facility')} 🏢\n\n"
+                    if 'location' in facility_info:
+                        response += f"📍 Location: {facility_info['location']}\n"
+                    if 'rating' in facility_info:
+                        response += f"⭐ Rating: {facility_info['rating']}/5.0\n\n"
                     response += f"✅ **Features:**\n"
                     for feature in facility_info.get('features', [])[:3]:
                         response += f"• {feature}\n"
-                    response += f"\n💡 **Pro Tip**: {facility_info['name']} is known for being {random.choice(['great for studying', 'perfect for socializing', 'very convenient', 'really nice'])}! 🦁\n\n"
+                    response += f"\n💡 **Pro Tip**: {facility_info.get('name', 'This place')} is known for being {random.choice(['great for studying', 'perfect for socializing', 'very convenient', 'really nice'])}! 🦁\n\n"
                     response += "🎯 **Campus Insight**: Students love using this facility!"
                 
                 response += self.add_contextual_recommendation(query, tone)
